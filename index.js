@@ -1,8 +1,19 @@
 require('dotenv').config()
 const axios = require('axios');
-const puppeteer = require('puppeteer');
 const express = require('express');
-const cors = require("cors");
+const cors = require('cors');
+
+
+var chrome = {};
+var puppeteer;
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+	// running on the Vercel platform.
+	chrome = require('chrome-aws-lambda');
+	puppeteer = require('puppeteer-core');
+} else {
+	// running locally.
+	puppeteer = require('puppeteer');
+}
 
 
 const getURL = async (title) => {
@@ -27,7 +38,9 @@ const getURL = async (title) => {
 
 
 const scrapeLyrics = async (url) => {
-	const browser = await puppeteer.launch();
+	const browser = await puppeteer.launch({
+		executablePath: await chrome.executablePath
+	});
 
 	const page = await browser.newPage();
 	await page.setRequestInterception(true);
