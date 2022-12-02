@@ -5,7 +5,7 @@ const cors = require('cors');
 const chromium = require('chrome-aws-lambda');
 
 
-const getURL = async (title) => {
+const getURL = async (title, artist) => {
 	try {
 		const response = await axios({
 			method: 'GET',
@@ -19,6 +19,11 @@ const getURL = async (title) => {
 				'q': title
 			}
 		});
+		// if (artist === undefined) {
+		// 	for (const hit of response.data.response.hits) {
+		// 		console.log(hit.result.featured_artists);
+		// 	}
+		// }
 		return response.data.response.hits[0].result.url;
 	} catch (error) {
 		console.error(error);
@@ -61,7 +66,8 @@ const app = express();
 app.use(cors());
 
 app.get("/", async (req, res) => {
-	res.send(await scrapeLyrics(await getURL('дао')));
+	if (req.query.title) res.send(await scrapeLyrics(await getURL(req.query.title)))
+	else res.send(null);
 });
 
 const port = process.env.PORT || 5000;
